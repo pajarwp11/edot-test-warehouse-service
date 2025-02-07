@@ -1,0 +1,1 @@
+# edot-test-warehouse-service
