@@ -5,6 +5,10 @@ import (
 	"log"
 	"net/http"
 	"warehouse-service/db/mysql"
+	warehouseHandler "warehouse-service/handler/warehouse"
+	"warehouse-service/middleware"
+	warehouseRepo "warehouse-service/repository/warehouse"
+	warehouseUsecase "warehouse-service/usecase/warehouse"
 
 	"github.com/gorilla/mux"
 )
@@ -12,6 +16,10 @@ import (
 func main() {
 	mysql.Connect()
 	router := mux.NewRouter()
+	warehouseRepository := warehouseRepo.NewWarehouseRepository(mysql.MySQL)
+	warehouseUsecase := warehouseUsecase.NewWarehouseUsecase(warehouseRepository)
+	warehouseHandler := warehouseHandler.NewWarehouseHandler(warehouseUsecase)
+	router.Handle("/warehouse/register", middleware.JWTMiddleware(http.HandlerFunc(warehouseHandler.Register))).Methods(http.MethodPost)
 
 	fmt.Println("server is running")
 	err := http.ListenAndServe(":8003", router)
