@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"warehouse-service/db/mysql"
+	"warehouse-service/conn/mysql"
+	"warehouse-service/conn/rabbitmq"
 	warehouseHandler "warehouse-service/handler/warehouse"
 	"warehouse-service/middleware"
 	warehouseRepo "warehouse-service/repository/warehouse"
@@ -15,6 +16,7 @@ import (
 
 func main() {
 	mysql.Connect()
+	rabbitmq.Connect()
 	router := mux.NewRouter()
 	warehouseRepository := warehouseRepo.NewWarehouseRepository(mysql.MySQL)
 	warehouseUsecase := warehouseUsecase.NewWarehouseUsecase(warehouseRepository)
