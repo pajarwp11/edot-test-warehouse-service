@@ -1,7 +1,6 @@
 package rabbitmq
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -10,8 +9,8 @@ import (
 )
 
 type Event struct {
-	Type string                 `json:"type"`
-	Data map[string]interface{} `json:"data"`
+	Type string      `json:"type"`
+	Data interface{} `json:"data"`
 }
 
 var (
@@ -89,38 +88,4 @@ func handleEvent(event Event) {
 	default:
 		fmt.Println("Unknown event:", event.Type)
 	}
-}
-
-func PublishEvent(eventType string, data map[string]interface{}) error {
-	ch, err := RabbitConn.Channel()
-	if err != nil {
-		return err
-	}
-	defer ch.Close()
-
-	err = ch.ExchangeDeclare(
-		exhangeName,
-		"topic",
-		true, false, false, false, nil,
-	)
-	if err != nil {
-		return err
-	}
-
-	event := Event{
-		Type: eventType,
-		Data: data,
-	}
-	body, _ := json.Marshal(event)
-
-	return ch.PublishWithContext(
-		context.Background(),
-		"stock_events",
-		eventType,
-		false, false,
-		amqp091.Publishing{
-			ContentType: "application/json",
-			Body:        body,
-		},
-	)
 }

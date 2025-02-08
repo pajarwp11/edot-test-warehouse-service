@@ -23,13 +23,15 @@ func main() {
 	go rabbitmq.ConsumeEvents()
 	router := mux.NewRouter()
 
+	rabbitPublisher := rabbitmq.NewRabbitPublisher(rabbitmq.RabbitConn)
+
 	warehouseRepository := warehouseRepo.NewWarehouseRepository(mysql.MySQL)
 	warehouseUsecase := warehouseUsecase.NewWarehouseUsecase(warehouseRepository)
 	warehouseHandler := warehouseHandler.NewWarehouseHandler(warehouseUsecase)
 	router.Handle("/warehouse/register", middleware.JWTMiddleware(http.HandlerFunc(warehouseHandler.Register))).Methods(http.MethodPost)
 
 	productWarehouseRepository := productWarehouseRepo.NewProductWarehouseRepository(mysql.MySQL)
-	productWarehouseUsecase := productWarehouseUsecase.NewProductWarehouseUsecase(productWarehouseRepository)
+	productWarehouseUsecase := productWarehouseUsecase.NewProductWarehouseUsecase(productWarehouseRepository, rabbitPublisher)
 	productWarehouseHandler := productWarehouseHandler.NewProductWarehouseHandler(productWarehouseUsecase)
 	router.Handle("/product-warehouse/register", middleware.JWTMiddleware(http.HandlerFunc(productWarehouseHandler.Register))).Methods(http.MethodPost)
 
