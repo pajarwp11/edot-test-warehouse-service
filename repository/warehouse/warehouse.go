@@ -20,3 +20,8 @@ func (w *WarehouseRepository) Insert(warehouse *warehouse.RegisterRequest) error
 	_, err := w.mysql.Exec("INSERT INTO warehouses (name,address,user_id) VALUES (?,?,?)", warehouse.Name, warehouse.Address, warehouse.ShopId)
 	return err
 }
+
+func (w *WarehouseRepository) UpdateStatus(id int, status string) error {
+	_, err := w.mysql.Exec("UPDATE warehouses SET status=? WHERE id=?", status, id)
+	return err
+}
