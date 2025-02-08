@@ -8,13 +8,19 @@ import (
 	"github.com/rabbitmq/amqp091-go"
 )
 
-type RabbitConsumer struct {
-	rabbitConn *amqp091.Connection
+type StockHandler interface {
+	TranserStock(data interface{}) error
 }
 
-func NewRabbitConsumer(rabbitConn *amqp091.Connection) *RabbitConsumer {
+type RabbitConsumer struct {
+	rabbitConn   *amqp091.Connection
+	stockHandler StockHandler
+}
+
+func NewRabbitConsumer(rabbitConn *amqp091.Connection, stockHandler StockHandler) *RabbitConsumer {
 	return &RabbitConsumer{
-		rabbitConn: rabbitConn,
+		rabbitConn:   rabbitConn,
+		stockHandler: stockHandler,
 	}
 }
 
@@ -38,14 +44,14 @@ func (r *RabbitConsumer) ConsumeEvents() {
 	}
 
 	for routingKey, queueName := range topics {
-		go startConsumer(ch, queueName, routingKey)
+		go r.startConsumer(ch, queueName, routingKey)
 	}
 
 	log.Println("consumer started")
 	select {}
 }
 
-func startConsumer(ch *amqp091.Channel, queueName, routingKey string) {
+func (r *RabbitConsumer) startConsumer(ch *amqp091.Channel, queueName, routingKey string) {
 	q, err := ch.QueueDeclare(
 		queueName,
 		true, false, false, false, nil)
@@ -58,7 +64,7 @@ func startConsumer(ch *amqp091.Channel, queueName, routingKey string) {
 		log.Fatal(err)
 	}
 
-	msgs, err := ch.Consume(q.Name, "", true, false, false, false, nil)
+	msgs, err := ch.Consume(q.Name, "", false, false, false, false, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -68,16 +74,22 @@ func startConsumer(ch *amqp091.Channel, queueName, routingKey string) {
 			var event Event
 			json.Unmarshal(d.Body, &event)
 			log.Printf("Received from %s: %+v\n", queueName, event)
-			handleEvent(event)
+			err := r.handleEvent(event)
+			if err != nil {
+				d.Nack(false, true)
+			} else {
+				d.Ack(false)
+			}
 		}
 	}()
 }
 
-func handleEvent(event Event) {
+func (r *RabbitConsumer) handleEvent(event Event) error {
 	switch event.Type {
 	case "stock.transfer":
-		fmt.Println("Handling stock reservation:", event.Data)
+		return r.stockHandler.TranserStock(event.Data)
 	default:
 		fmt.Println("Unknown event:", event.Type)
+		return nil
 	}
 }

@@ -21,13 +21,13 @@ func (p *ProductWarehouseRepository) Insert(productWarehouse *product_warehouse.
 	return err
 }
 
-func (p *ProductWarehouseRepository) AddAvailableStock(productId int, warehouseId int, addedAvailableStock int) error {
-	_, err := p.mysql.Exec("UPDATE warehouses SET available_stock = available_stock + ? WHERE product_id=? and warehouse_id=?", addedAvailableStock, productId, warehouseId)
+func (p *ProductWarehouseRepository) AddAvailableStock(tx *sqlx.Tx, productId int, warehouseId int, addedAvailableStock int) error {
+	_, err := tx.Exec("UPDATE warehouses SET available_stock = available_stock + ? WHERE product_id=? and warehouse_id=?", addedAvailableStock, productId, warehouseId)
 	return err
 }
 
-func (p *ProductWarehouseRepository) SubstractAvailableStock(productId int, warehouseId int, substractedAvailableStock int) error {
-	_, err := p.mysql.Exec("UPDATE warehouses SET available_stock = available_stock - ? WHERE product_id=? and warehouse_id=?", substractedAvailableStock, productId, warehouseId)
+func (p *ProductWarehouseRepository) SubstractAvailableStock(tx *sqlx.Tx, productId int, warehouseId int, substractedAvailableStock int) error {
+	_, err := tx.Exec("UPDATE warehouses SET available_stock = available_stock - ? WHERE product_id=? and warehouse_id=?", substractedAvailableStock, productId, warehouseId)
 	return err
 }
 
@@ -44,4 +44,10 @@ func (p *ProductWarehouseRepository) SubsAvailableStockAddReservedStock(productI
 func (p *ProductWarehouseRepository) SubstractReservedStock(productId int, warehouseId int, substractedReservedStock int) error {
 	_, err := p.mysql.Exec("UPDATE warehouses SET reserved_stock = reserved_stock - ? WHERE product_id=? and warehouse_id=?", substractedReservedStock, productId, warehouseId)
 	return err
+}
+
+func (p *ProductWarehouseRepository) GetByProductAndWarehouseId(productId int, wareHouseId int) (*product_warehouse.ProductWarehouse, error) {
+	data := product_warehouse.ProductWarehouse{}
+	err := p.mysql.Get(&data, "SELECT id,product_id,warehouse_id,available_stock,reserved_stock FROM shops WHERE product_id=? and warehouse_id=?", productId, wareHouseId)
+	return &data, err
 }

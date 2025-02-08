@@ -20,8 +20,6 @@ import (
 func main() {
 	mysql.Connect()
 	rabbitmq.Connect()
-	rabbitConsumer := rabbitmq.NewRabbitConsumer(rabbitmq.RabbitConn)
-	go rabbitConsumer.ConsumeEvents()
 	router := mux.NewRouter()
 
 	rabbitPublisher := rabbitmq.NewRabbitPublisher(rabbitmq.RabbitConn)
@@ -32,10 +30,13 @@ func main() {
 	router.Handle("/warehouse/register", middleware.JWTMiddleware(http.HandlerFunc(warehouseHandler.Register))).Methods(http.MethodPost)
 
 	productWarehouseRepository := productWarehouseRepo.NewProductWarehouseRepository(mysql.MySQL)
-	productWarehouseUsecase := productWarehouseUsecase.NewProductWarehouseUsecase(productWarehouseRepository, rabbitPublisher)
+	productWarehouseUsecase := productWarehouseUsecase.NewProductWarehouseUsecase(productWarehouseRepository, rabbitPublisher, mysql.MySQL)
 	productWarehouseHandler := productWarehouseHandler.NewProductWarehouseHandler(productWarehouseUsecase)
 	router.Handle("/product-warehouse/register", middleware.JWTMiddleware(http.HandlerFunc(productWarehouseHandler.Register))).Methods(http.MethodPost)
-	router.Handle("/product-warehouse/transfer", middleware.JWTMiddleware(http.HandlerFunc(productWarehouseHandler.TranserStock))).Methods(http.MethodPost)
+	router.Handle("/product-warehouse/transfer", middleware.JWTMiddleware(http.HandlerFunc(productWarehouseHandler.TranserStockRequest))).Methods(http.MethodPost)
+
+	rabbitConsumer := rabbitmq.NewRabbitConsumer(rabbitmq.RabbitConn, productWarehouseHandler)
+	go rabbitConsumer.ConsumeEvents()
 
 	fmt.Println("server is running")
 	err := http.ListenAndServe(":8003", router)

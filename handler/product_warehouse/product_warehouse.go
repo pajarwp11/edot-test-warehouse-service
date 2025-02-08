@@ -2,6 +2,7 @@ package product_warehouse
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"warehouse-service/models/product_warehouse"
 
@@ -10,6 +11,7 @@ import (
 
 type ProductWarehouseUsecase interface {
 	Register(productWarehouseRegister *product_warehouse.RegisterRequest) error
+	TransferStockRequest(transferStock *product_warehouse.TransferStockRequest) error
 	TransferStock(transferStock *product_warehouse.TransferStockRequest) error
 }
 
@@ -59,7 +61,7 @@ func (p *ProductWarehouseHandler) Register(w http.ResponseWriter, req *http.Requ
 	json.NewEncoder(w).Encode(response)
 }
 
-func (p *ProductWarehouseHandler) TranserStock(w http.ResponseWriter, req *http.Request) {
+func (p *ProductWarehouseHandler) TranserStockRequest(w http.ResponseWriter, req *http.Request) {
 	request := product_warehouse.TransferStockRequest{}
 	response := Response{}
 	w.Header().Set("Content-Type", "application/json")
@@ -76,7 +78,7 @@ func (p *ProductWarehouseHandler) TranserStock(w http.ResponseWriter, req *http.
 		return
 	}
 
-	err := p.productWarehouseUsecase.TransferStock(&request)
+	err := p.productWarehouseUsecase.TransferStockRequest(&request)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		response.Message = err.Error()
@@ -86,4 +88,20 @@ func (p *ProductWarehouseHandler) TranserStock(w http.ResponseWriter, req *http.
 	w.WriteHeader(http.StatusCreated)
 	response.Message = "stock is transferred"
 	json.NewEncoder(w).Encode(response)
+}
+
+func (p *ProductWarehouseHandler) TranserStock(data interface{}) error {
+	request, ok := data.(product_warehouse.TransferStockRequest)
+	if !ok {
+		return errors.New("invalid body request")
+	}
+	if err := validate.Struct(request); err != nil {
+		return err
+	}
+
+	err := p.productWarehouseUsecase.TransferStockRequest(&request)
+	if err != nil {
+		return err
+	}
+	return nil
 }
