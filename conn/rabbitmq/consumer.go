@@ -9,7 +9,8 @@ import (
 )
 
 type StockHandler interface {
-	TranserStock(data interface{}) error
+	TransferStock(data interface{}) error
+	AddStock(data interface{}) error
 }
 
 type RabbitConsumer struct {
@@ -87,7 +88,9 @@ func (r *RabbitConsumer) startConsumer(ch *amqp091.Channel, queueName, routingKe
 func (r *RabbitConsumer) handleEvent(event Event) error {
 	switch event.Type {
 	case "stock.transfer":
-		return r.stockHandler.TranserStock(event.Data)
+		return r.stockHandler.TransferStock(event.Data)
+	case "stock.add":
+		return r.stockHandler.AddStock(event.Data)
 	default:
 		fmt.Println("Unknown event:", event.Type)
 		return nil

@@ -20,3 +20,9 @@ type TransferStockRequest struct {
 	ToWarehouseId   int `json:"to_warehouse_id" validate:"required"`
 	Quantity        int `json:"quantity" validate:"required"`
 }
+
+type AddStockRequest struct {
+	ProductId   int `json:"product_id" validate:"required"`
+	WarehouseId int `json:"warehouse_id" validate:"required"`
+	Quantity    int `json:"quantity" validate:"required"`
+}

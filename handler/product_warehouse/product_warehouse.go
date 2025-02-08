@@ -13,6 +13,8 @@ type ProductWarehouseUsecase interface {
 	Register(productWarehouseRegister *product_warehouse.RegisterRequest) error
 	TransferStockRequest(transferStock *product_warehouse.TransferStockRequest) error
 	TransferStock(transferStock *product_warehouse.TransferStockRequest) error
+	AddStockRequest(addStock *product_warehouse.AddStockRequest) error
+	AddStock(addStock *product_warehouse.AddStockRequest) error
 }
 
 type ProductWarehouseHandler struct {
@@ -90,7 +92,7 @@ func (p *ProductWarehouseHandler) TranserStockRequest(w http.ResponseWriter, req
 	json.NewEncoder(w).Encode(response)
 }
 
-func (p *ProductWarehouseHandler) TranserStock(data interface{}) error {
+func (p *ProductWarehouseHandler) TransferStock(data interface{}) error {
 	request, ok := data.(product_warehouse.TransferStockRequest)
 	if !ok {
 		return errors.New("invalid body request")
@@ -99,7 +101,52 @@ func (p *ProductWarehouseHandler) TranserStock(data interface{}) error {
 		return err
 	}
 
-	err := p.productWarehouseUsecase.TransferStockRequest(&request)
+	err := p.productWarehouseUsecase.TransferStock(&request)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *ProductWarehouseHandler) AddStockRequest(w http.ResponseWriter, req *http.Request) {
+	request := product_warehouse.AddStockRequest{}
+	response := Response{}
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewDecoder(req.Body).Decode(&request); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		response.Message = "invalid request body"
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	if err := validate.Struct(request); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"message": err.Error()})
+		return
+	}
+
+	err := p.productWarehouseUsecase.AddStockRequest(&request)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		response.Message = err.Error()
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	response.Message = "stock is added"
+	json.NewEncoder(w).Encode(response)
+}
+
+func (p *ProductWarehouseHandler) AddStock(data interface{}) error {
+	request, ok := data.(product_warehouse.AddStockRequest)
+	if !ok {
+		return errors.New("invalid body request")
+	}
+	if err := validate.Struct(request); err != nil {
+		return err
+	}
+
+	err := p.productWarehouseUsecase.AddStock(&request)
 	if err != nil {
 		return err
 	}

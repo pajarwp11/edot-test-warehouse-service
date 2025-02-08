@@ -77,3 +77,25 @@ func (p *ProductWarehouseUsecase) TransferStock(transferStock *product_warehouse
 	tx.Commit()
 	return nil
 }
+
+func (p *ProductWarehouseUsecase) AddStockRequest(addStock *product_warehouse.AddStockRequest) error {
+	return p.publisher.PublishEvent(entity.StockAddEvent, addStock)
+}
+
+func (p *ProductWarehouseUsecase) AddStock(addStock *product_warehouse.AddStockRequest) error {
+	tx, err := p.mysql.Beginx()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+	err = p.productWarehouseRepo.AddAvailableStock(tx, addStock.ProductId, addStock.WarehouseId, addStock.Quantity)
+	if err != nil {
+		return err
+	}
+	tx.Commit()
+	return nil
+}

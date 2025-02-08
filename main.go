@@ -34,6 +34,7 @@ func main() {
 	productWarehouseHandler := productWarehouseHandler.NewProductWarehouseHandler(productWarehouseUsecase)
 	router.Handle("/product-warehouse/register", middleware.JWTMiddleware(http.HandlerFunc(productWarehouseHandler.Register))).Methods(http.MethodPost)
 	router.Handle("/product-warehouse/transfer", middleware.JWTMiddleware(http.HandlerFunc(productWarehouseHandler.TranserStockRequest))).Methods(http.MethodPost)
+	router.Handle("/product-warehouse/add", middleware.JWTMiddleware(http.HandlerFunc(productWarehouseHandler.AddStockRequest))).Methods(http.MethodPost)
 
 	rabbitConsumer := rabbitmq.NewRabbitConsumer(rabbitmq.RabbitConn, productWarehouseHandler)
 	go rabbitConsumer.ConsumeEvents()
