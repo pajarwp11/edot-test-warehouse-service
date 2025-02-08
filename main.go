@@ -20,7 +20,8 @@ import (
 func main() {
 	mysql.Connect()
 	rabbitmq.Connect()
-	go rabbitmq.ConsumeEvents()
+	rabbitConsumer := rabbitmq.NewRabbitConsumer(rabbitmq.RabbitConn)
+	go rabbitConsumer.ConsumeEvents()
 	router := mux.NewRouter()
 
 	rabbitPublisher := rabbitmq.NewRabbitPublisher(rabbitmq.RabbitConn)
