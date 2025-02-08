@@ -13,6 +13,8 @@ type StockHandler interface {
 	TransferStock(data interface{}) error
 	AddStock(data interface{}) error
 	DeductStock(data interface{}) error
+	ReleaseReservedStock(data interface{}) error
+	ReturnReservedStock(data interface{}) error
 }
 
 type RabbitConsumer struct {
@@ -95,6 +97,10 @@ func (r *RabbitConsumer) handleEvent(event Event) error {
 		return r.stockHandler.AddStock(event.Data)
 	case entity.StockDeductEvent:
 		return r.stockHandler.DeductStock(event.Data)
+	case entity.StockReleaseEvent:
+		return r.stockHandler.ReleaseReservedStock(event.Data)
+	case entity.StockReturnEvent:
+		return r.stockHandler.ReturnReservedStock(event.Data)
 	default:
 		fmt.Println("Unknown event:", event.Type)
 		return nil

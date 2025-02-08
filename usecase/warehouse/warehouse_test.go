@@ -19,6 +19,11 @@ func (m *MockWarehouseRepository) Insert(warehouse *warehouse.RegisterRequest) e
 	return args.Error(0)
 }
 
+func (m *MockWarehouseRepository) UpdateStatus(id int, status string) error {
+	args := m.Called(id, status)
+	return args.Error(0)
+}
+
 func TestRegister_Success(t *testing.T) {
 	mockRepo := new(MockWarehouseRepository)
 	warehouseUsecase := NewWarehouseUsecase(mockRepo)

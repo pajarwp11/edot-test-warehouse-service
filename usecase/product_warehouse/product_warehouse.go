@@ -121,3 +121,29 @@ func (p *ProductWarehouseUsecase) DeductStock(deductStock *product_warehouse.Sto
 	tx.Commit()
 	return nil
 }
+
+func (p *ProductWarehouseUsecase) ReleaseReservedStock(operationStock *product_warehouse.StockOperationRequest) error {
+	err := p.productWarehouseRepo.SubstractReservedStock(operationStock.ProductId, operationStock.WarehouseId, operationStock.Quantity)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *ProductWarehouseUsecase) ReturnReservedStock(operationStock *product_warehouse.StockOperationRequest) error {
+	tx, err := p.mysql.Beginx()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+	err = p.productWarehouseRepo.AddAvailableStockSubsReservedStock(operationStock.ProductId, operationStock.WarehouseId, operationStock.Quantity, operationStock.Quantity)
+	if err != nil {
+		return err
+	}
+	tx.Commit()
+	return nil
+}

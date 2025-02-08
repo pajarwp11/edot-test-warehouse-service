@@ -17,6 +17,8 @@ type ProductWarehouseUsecase interface {
 	AddStock(addStock *product_warehouse.StockOperationRequest) error
 	DeductStockRequest(deductStock *product_warehouse.StockOperationRequest) error
 	DeductStock(deductStock *product_warehouse.StockOperationRequest) error
+	ReleaseReservedStock(operationStock *product_warehouse.StockOperationRequest) error
+	ReturnReservedStock(operationStock *product_warehouse.StockOperationRequest) error
 }
 
 type ProductWarehouseHandler struct {
@@ -194,6 +196,38 @@ func (p *ProductWarehouseHandler) DeductStock(data interface{}) error {
 	}
 
 	err := p.productWarehouseUsecase.DeductStock(&request)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *ProductWarehouseHandler) ReleaseReservedStock(data interface{}) error {
+	request, ok := data.(product_warehouse.StockOperationRequest)
+	if !ok {
+		return errors.New("invalid body request")
+	}
+	if err := validate.Struct(request); err != nil {
+		return err
+	}
+
+	err := p.productWarehouseUsecase.ReleaseReservedStock(&request)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *ProductWarehouseHandler) ReturnReservedStock(data interface{}) error {
+	request, ok := data.(product_warehouse.StockOperationRequest)
+	if !ok {
+		return errors.New("invalid body request")
+	}
+	if err := validate.Struct(request); err != nil {
+		return err
+	}
+
+	err := p.productWarehouseUsecase.ReturnReservedStock(&request)
 	if err != nil {
 		return err
 	}

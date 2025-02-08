@@ -28,6 +28,7 @@ func main() {
 	warehouseUsecase := warehouseUsecase.NewWarehouseUsecase(warehouseRepository)
 	warehouseHandler := warehouseHandler.NewWarehouseHandler(warehouseUsecase)
 	router.Handle("/warehouse/register", middleware.JWTMiddleware(http.HandlerFunc(warehouseHandler.Register))).Methods(http.MethodPost)
+	router.Handle("/warehouse/update-status", middleware.JWTMiddleware(http.HandlerFunc(warehouseHandler.UpdateStatus))).Methods(http.MethodPut)
 
 	productWarehouseRepository := productWarehouseRepo.NewProductWarehouseRepository(mysql.MySQL)
 	productWarehouseUsecase := productWarehouseUsecase.NewProductWarehouseUsecase(productWarehouseRepository, rabbitPublisher, mysql.MySQL)
@@ -35,6 +36,7 @@ func main() {
 	router.Handle("/product-warehouse/register", middleware.JWTMiddleware(http.HandlerFunc(productWarehouseHandler.Register))).Methods(http.MethodPost)
 	router.Handle("/product-warehouse/transfer", middleware.JWTMiddleware(http.HandlerFunc(productWarehouseHandler.TranserStockRequest))).Methods(http.MethodPost)
 	router.Handle("/product-warehouse/add", middleware.JWTMiddleware(http.HandlerFunc(productWarehouseHandler.AddStockRequest))).Methods(http.MethodPost)
+	router.Handle("/product-warehouse/deduct", middleware.JWTMiddleware(http.HandlerFunc(productWarehouseHandler.DeductStockRequest))).Methods(http.MethodPost)
 
 	rabbitConsumer := rabbitmq.NewRabbitConsumer(rabbitmq.RabbitConn, productWarehouseHandler)
 	go rabbitConsumer.ConsumeEvents()

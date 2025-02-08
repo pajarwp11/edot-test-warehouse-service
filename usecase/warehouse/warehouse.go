@@ -6,6 +6,7 @@ import (
 
 type WarehouseRepository interface {
 	Insert(warehouse *warehouse.RegisterRequest) error
+	UpdateStatus(id int, status string) error
 }
 
 type WarehouseUsecase struct {
@@ -20,4 +21,8 @@ func NewWarehouseUsecase(warehouseRepo WarehouseRepository) *WarehouseUsecase {
 
 func (w *WarehouseUsecase) Register(warehouseRegister *warehouse.RegisterRequest) error {
 	return w.warehouseRepo.Insert(warehouseRegister)
+}
+
+func (w *WarehouseUsecase) UpdateStatus(updateStatus *warehouse.UpdateStatusRequest) error {
+	return w.warehouseRepo.UpdateStatus(updateStatus.Id, updateStatus.Status)
 }
