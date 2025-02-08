@@ -34,6 +34,7 @@ func main() {
 	productWarehouseUsecase := productWarehouseUsecase.NewProductWarehouseUsecase(productWarehouseRepository, rabbitPublisher)
 	productWarehouseHandler := productWarehouseHandler.NewProductWarehouseHandler(productWarehouseUsecase)
 	router.Handle("/product-warehouse/register", middleware.JWTMiddleware(http.HandlerFunc(productWarehouseHandler.Register))).Methods(http.MethodPost)
+	router.Handle("/product-warehouse/transfer", middleware.JWTMiddleware(http.HandlerFunc(productWarehouseHandler.TranserStock))).Methods(http.MethodPost)
 
 	fmt.Println("server is running")
 	err := http.ListenAndServe(":8003", router)

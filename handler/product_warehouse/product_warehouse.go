@@ -10,6 +10,7 @@ import (
 
 type ProductWarehouseUsecase interface {
 	Register(productWarehouseRegister *product_warehouse.RegisterRequest) error
+	TransferStock(transferStock *product_warehouse.TransferStockRequest) error
 }
 
 type ProductWarehouseHandler struct {
@@ -55,5 +56,34 @@ func (p *ProductWarehouseHandler) Register(w http.ResponseWriter, req *http.Requ
 	}
 	w.WriteHeader(http.StatusCreated)
 	response.Message = "product warehouse registered"
+	json.NewEncoder(w).Encode(response)
+}
+
+func (p *ProductWarehouseHandler) TranserStock(w http.ResponseWriter, req *http.Request) {
+	request := product_warehouse.TransferStockRequest{}
+	response := Response{}
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewDecoder(req.Body).Decode(&request); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		response.Message = "invalid request body"
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	if err := validate.Struct(request); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"message": err.Error()})
+		return
+	}
+
+	err := p.productWarehouseUsecase.TransferStock(&request)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		response.Message = err.Error()
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	response.Message = "stock is transferred"
 	json.NewEncoder(w).Encode(response)
 }
