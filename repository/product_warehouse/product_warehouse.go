@@ -20,3 +20,28 @@ func (p *ProductWarehouseRepository) Insert(productWarehouse *product_warehouse.
 	_, err := p.mysql.Exec("INSERT INTO product_warehouses (product_id,warehouse_id,available_stock) VALUES (?,?,?)", productWarehouse.ProductId, productWarehouse.WarehouseId, productWarehouse.AvailableStock)
 	return err
 }
+
+func (p *ProductWarehouseRepository) AddAvailableStock(productId int, warehouseId int, addedAvailableStock int) error {
+	_, err := p.mysql.Exec("UPDATE warehouses SET available_stock = available_stock + ? WHERE product_id=? and warehouse_id=?", addedAvailableStock, productId, warehouseId)
+	return err
+}
+
+func (p *ProductWarehouseRepository) SubstractAvailableStock(productId int, warehouseId int, substractedAvailableStock int) error {
+	_, err := p.mysql.Exec("UPDATE warehouses SET available_stock = available_stock - ? WHERE product_id=? and warehouse_id=?", substractedAvailableStock, productId, warehouseId)
+	return err
+}
+
+func (p *ProductWarehouseRepository) AddAvailableStockSubsReservedStock(productId int, warehouseId int, addedAvailableStock int, substractedReservedStock int) error {
+	_, err := p.mysql.Exec("UPDATE warehouses SET available_stock = available_stock + ?, reserved_stock = reserved_stock - ? WHERE product_id=? and warehouse_id=?", addedAvailableStock, substractedReservedStock, productId, warehouseId)
+	return err
+}
+
+func (p *ProductWarehouseRepository) SubsAvailableStockAddReservedStock(productId int, warehouseId int, substractedAvailableStock int, addedReservedStock int) error {
+	_, err := p.mysql.Exec("UPDATE warehouses SET available_stock = available_stock - ?, reserved_stock = reserved_stock + ? WHERE product_id=? and warehouse_id=?", substractedAvailableStock, addedReservedStock, productId, warehouseId)
+	return err
+}
+
+func (p *ProductWarehouseRepository) SubstractReservedStock(productId int, warehouseId int, substractedReservedStock int) error {
+	_, err := p.mysql.Exec("UPDATE warehouses SET reserved_stock = reserved_stock - ? WHERE product_id=? and warehouse_id=?", substractedReservedStock, productId, warehouseId)
+	return err
+}
