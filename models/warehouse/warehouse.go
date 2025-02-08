@@ -9,6 +9,6 @@ type Warehouse struct {
 
 type RegisterRequest struct {
 	Name    string `json:"name" validate:"required"`
-	Address string `json:"sddress" validate:"required"`
+	Address string `json:"address" validate:"required"`
 	ShopId  int    `json:"shop_id" validate:"required"`
 }
