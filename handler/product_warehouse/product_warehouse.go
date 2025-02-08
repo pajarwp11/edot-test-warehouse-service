@@ -13,8 +13,10 @@ type ProductWarehouseUsecase interface {
 	Register(productWarehouseRegister *product_warehouse.RegisterRequest) error
 	TransferStockRequest(transferStock *product_warehouse.TransferStockRequest) error
 	TransferStock(transferStock *product_warehouse.TransferStockRequest) error
-	AddStockRequest(addStock *product_warehouse.AddStockRequest) error
-	AddStock(addStock *product_warehouse.AddStockRequest) error
+	AddStockRequest(addStock *product_warehouse.StockOperationRequest) error
+	AddStock(addStock *product_warehouse.StockOperationRequest) error
+	DeductStockRequest(deductStock *product_warehouse.StockOperationRequest) error
+	DeductStock(deductStock *product_warehouse.StockOperationRequest) error
 }
 
 type ProductWarehouseHandler struct {
@@ -109,7 +111,7 @@ func (p *ProductWarehouseHandler) TransferStock(data interface{}) error {
 }
 
 func (p *ProductWarehouseHandler) AddStockRequest(w http.ResponseWriter, req *http.Request) {
-	request := product_warehouse.AddStockRequest{}
+	request := product_warehouse.StockOperationRequest{}
 	response := Response{}
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewDecoder(req.Body).Decode(&request); err != nil {
@@ -138,7 +140,7 @@ func (p *ProductWarehouseHandler) AddStockRequest(w http.ResponseWriter, req *ht
 }
 
 func (p *ProductWarehouseHandler) AddStock(data interface{}) error {
-	request, ok := data.(product_warehouse.AddStockRequest)
+	request, ok := data.(product_warehouse.StockOperationRequest)
 	if !ok {
 		return errors.New("invalid body request")
 	}
@@ -147,6 +149,51 @@ func (p *ProductWarehouseHandler) AddStock(data interface{}) error {
 	}
 
 	err := p.productWarehouseUsecase.AddStock(&request)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *ProductWarehouseHandler) DeductStockRequest(w http.ResponseWriter, req *http.Request) {
+	request := product_warehouse.StockOperationRequest{}
+	response := Response{}
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewDecoder(req.Body).Decode(&request); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		response.Message = "invalid request body"
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	if err := validate.Struct(request); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"message": err.Error()})
+		return
+	}
+
+	err := p.productWarehouseUsecase.DeductStockRequest(&request)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		response.Message = err.Error()
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	response.Message = "stock is deducted"
+	json.NewEncoder(w).Encode(response)
+}
+
+func (p *ProductWarehouseHandler) DeductStock(data interface{}) error {
+	request, ok := data.(product_warehouse.StockOperationRequest)
+	if !ok {
+		return errors.New("invalid body request")
+	}
+	if err := validate.Struct(request); err != nil {
+		return err
+	}
+
+	err := p.productWarehouseUsecase.DeductStock(&request)
 	if err != nil {
 		return err
 	}

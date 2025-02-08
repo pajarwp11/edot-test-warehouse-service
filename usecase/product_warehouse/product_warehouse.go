@@ -78,11 +78,11 @@ func (p *ProductWarehouseUsecase) TransferStock(transferStock *product_warehouse
 	return nil
 }
 
-func (p *ProductWarehouseUsecase) AddStockRequest(addStock *product_warehouse.AddStockRequest) error {
+func (p *ProductWarehouseUsecase) AddStockRequest(addStock *product_warehouse.StockOperationRequest) error {
 	return p.publisher.PublishEvent(entity.StockAddEvent, addStock)
 }
 
-func (p *ProductWarehouseUsecase) AddStock(addStock *product_warehouse.AddStockRequest) error {
+func (p *ProductWarehouseUsecase) AddStock(addStock *product_warehouse.StockOperationRequest) error {
 	tx, err := p.mysql.Beginx()
 	if err != nil {
 		return err
@@ -93,6 +93,28 @@ func (p *ProductWarehouseUsecase) AddStock(addStock *product_warehouse.AddStockR
 		}
 	}()
 	err = p.productWarehouseRepo.AddAvailableStock(tx, addStock.ProductId, addStock.WarehouseId, addStock.Quantity)
+	if err != nil {
+		return err
+	}
+	tx.Commit()
+	return nil
+}
+
+func (p *ProductWarehouseUsecase) DeductStockRequest(deductStock *product_warehouse.StockOperationRequest) error {
+	return p.publisher.PublishEvent(entity.StockDeductEvent, deductStock)
+}
+
+func (p *ProductWarehouseUsecase) DeductStock(deductStock *product_warehouse.StockOperationRequest) error {
+	tx, err := p.mysql.Beginx()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+	err = p.productWarehouseRepo.SubstractAvailableStock(tx, deductStock.ProductId, deductStock.WarehouseId, deductStock.Quantity)
 	if err != nil {
 		return err
 	}

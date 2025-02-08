@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"warehouse-service/entity"
 
 	"github.com/rabbitmq/amqp091-go"
 )
@@ -11,6 +12,7 @@ import (
 type StockHandler interface {
 	TransferStock(data interface{}) error
 	AddStock(data interface{}) error
+	DeductStock(data interface{}) error
 }
 
 type RabbitConsumer struct {
@@ -87,10 +89,12 @@ func (r *RabbitConsumer) startConsumer(ch *amqp091.Channel, queueName, routingKe
 
 func (r *RabbitConsumer) handleEvent(event Event) error {
 	switch event.Type {
-	case "stock.transfer":
+	case entity.StockTransferEvent:
 		return r.stockHandler.TransferStock(event.Data)
-	case "stock.add":
+	case entity.StockAddEvent:
 		return r.stockHandler.AddStock(event.Data)
+	case entity.StockDeductEvent:
+		return r.stockHandler.DeductStock(event.Data)
 	default:
 		fmt.Println("Unknown event:", event.Type)
 		return nil
