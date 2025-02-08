@@ -23,6 +23,6 @@ func NewProductWarehouseUsecase(productWarehouseRepo ProductWarehouseRepository)
 	}
 }
 
-func (p *ProductWarehouseUsecase) Register(warehouseRegister *product_warehouse.RegisterRequest) error {
-	return p.productWarehouseRepo.Insert(warehouseRegister)
+func (p *ProductWarehouseUsecase) Register(productWarehouseRegister *product_warehouse.RegisterRequest) error {
+	return p.productWarehouseRepo.Insert(productWarehouseRegister)
 }
