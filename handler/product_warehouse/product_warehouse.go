@@ -92,7 +92,7 @@ func (p *ProductWarehouseHandler) TranserStockRequest(w http.ResponseWriter, req
 		json.NewEncoder(w).Encode(response)
 		return
 	}
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
 	response.Message = "stock is transferred"
 	json.NewEncoder(w).Encode(response)
 }
@@ -137,7 +137,7 @@ func (p *ProductWarehouseHandler) AddStockRequest(w http.ResponseWriter, req *ht
 		json.NewEncoder(w).Encode(response)
 		return
 	}
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
 	response.Message = "stock is added"
 	json.NewEncoder(w).Encode(response)
 }
@@ -182,7 +182,7 @@ func (p *ProductWarehouseHandler) DeductStockRequest(w http.ResponseWriter, req 
 		json.NewEncoder(w).Encode(response)
 		return
 	}
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
 	response.Message = "stock is deducted"
 	json.NewEncoder(w).Encode(response)
 }
@@ -259,7 +259,7 @@ func (p *ProductWarehouseHandler) GetAvailableStock(w http.ResponseWriter, req *
 		json.NewEncoder(w).Encode(response)
 		return
 	}
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
 	response.Message = "get available stock success"
 	response.Data = availableStock
 	json.NewEncoder(w).Encode(response)
