@@ -26,3 +26,8 @@ type StockOperationRequest struct {
 	WarehouseId int `json:"warehouse_id" validate:"required"`
 	Quantity    int `json:"quantity" validate:"required"`
 }
+
+type GetAvailableStockRequest struct {
+	ProductId int `json:"product_id" validate:"required"`
+	ShopId    int `json:"shop_id" validate:"required"`
+}

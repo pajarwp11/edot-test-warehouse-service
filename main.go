@@ -37,6 +37,7 @@ func main() {
 	router.Handle("/product-warehouse/transfer", middleware.JWTMiddleware(http.HandlerFunc(productWarehouseHandler.TranserStockRequest))).Methods(http.MethodPost)
 	router.Handle("/product-warehouse/add", middleware.JWTMiddleware(http.HandlerFunc(productWarehouseHandler.AddStockRequest))).Methods(http.MethodPost)
 	router.Handle("/product-warehouse/deduct", middleware.JWTMiddleware(http.HandlerFunc(productWarehouseHandler.DeductStockRequest))).Methods(http.MethodPost)
+	router.Handle("/product-warehouse/available-stock", middleware.JWTMiddleware(http.HandlerFunc(productWarehouseHandler.GetAvailableStock))).Methods(http.MethodGet)
 
 	rabbitConsumer := rabbitmq.NewRabbitConsumer(rabbitmq.RabbitConn, productWarehouseHandler)
 	go rabbitConsumer.ConsumeEvents()
