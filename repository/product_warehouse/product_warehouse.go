@@ -53,12 +53,12 @@ func (p *ProductWarehouseRepository) GetByProductAndWarehouseId(productId int, w
 	return &data, err
 }
 
-func (p *ProductWarehouseRepository) GetAvailableStockBulk(productShopMap map[int]int) (map[int]int, error) {
+func (p *ProductWarehouseRepository) GetAvailableStockBulk(availableStockRequest *product_warehouse.GetAvailableStockRequest) (map[int]int, error) {
 	productIds := []int{}
 	shopIds := []int{}
-	for productId, shopId := range productShopMap {
-		productIds = append(productIds, productId)
-		shopIds = append(shopIds, shopId)
+	for _, productShopMap := range availableStockRequest.ProductShopMap {
+		productIds = append(productIds, productShopMap.ProductId)
+		shopIds = append(shopIds, productShopMap.ShopId)
 	}
 
 	query, args, err := sqlx.In(`

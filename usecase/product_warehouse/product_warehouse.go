@@ -16,7 +16,7 @@ type ProductWarehouseRepository interface {
 	SubsAvailableStockAddReservedStock(productId int, warehouseId int, substractedAvailableStock int, addedReservedStock int) error
 	SubstractReservedStock(productId int, warehouseId int, substractedReservedStock int) error
 	GetByProductAndWarehouseId(productId int, wareHouseId int) (*product_warehouse.ProductWarehouse, error)
-	GetAvailableStockBulk(productShopMap map[int]int) (map[int]int, error)
+	GetAvailableStockBulk(availableStockRequest *product_warehouse.GetAvailableStockRequest) (map[int]int, error)
 }
 
 type Publisher interface {
@@ -150,5 +150,5 @@ func (p *ProductWarehouseUsecase) ReturnReservedStock(operationStock *product_wa
 }
 
 func (p *ProductWarehouseUsecase) GetAvailableStockBulk(getAvailableStock *product_warehouse.GetAvailableStockRequest) (map[int]int, error) {
-	return p.productWarehouseRepo.GetAvailableStockBulk(getAvailableStock.ProductShopMap)
+	return p.productWarehouseRepo.GetAvailableStockBulk(getAvailableStock)
 }
