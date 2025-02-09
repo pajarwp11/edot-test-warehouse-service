@@ -19,7 +19,7 @@ type ProductWarehouseUsecase interface {
 	ReleaseReservedStock(operationStock *product_warehouse.StockOperationRequest) error
 	ReturnReservedStock(operationStock []product_warehouse.StockOperationRequest) error
 	GetAvailableStockBulk(getAvailableStock []product_warehouse.ProductShop) (map[int]int, error)
-	ReserveStock(operationStock []product_warehouse.StockOperationRequest) error
+	ReserveStock(operationStock *product_warehouse.StockOperationOrderRequest) error
 }
 
 type ProductWarehouseHandler struct {

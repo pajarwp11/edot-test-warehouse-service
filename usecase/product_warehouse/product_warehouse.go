@@ -184,7 +184,7 @@ func (p *ProductWarehouseUsecase) ReturnReservedStock(operationStock []product_w
 	return nil
 }
 
-func (p *ProductWarehouseUsecase) ReserveStock(operationStock []product_warehouse.StockOperationRequest) error {
+func (p *ProductWarehouseUsecase) ReserveStock(operationStock *product_warehouse.StockOperationOrderRequest) error {
 	tx, err := p.mysql.Beginx()
 	if err != nil {
 		return err
@@ -196,15 +196,16 @@ func (p *ProductWarehouseUsecase) ReserveStock(operationStock []product_warehous
 		}
 	}()
 
-	for _, operation := range operationStock {
+	for _, operation := range operationStock.StockOperations {
 		availableStock, err := p.productWarehouseRepo.GetAvailableStock(operation.ProductId)
 		if err != nil {
 			tx.Rollback()
 			return err
 		}
 		if availableStock < operation.Quantity {
+			tx.Rollback()
 			updateOrderRequest := product_warehouse.UpdateStatusRequest{
-				Id:     operation.OrderId,
+				Id:     operationStock.OrderId,
 				Status: "cancel",
 			}
 			go p.publisher.PublishEvent(entity.OrderUpdateStatusEvent, updateOrderRequest)
