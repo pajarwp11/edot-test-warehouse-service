@@ -63,7 +63,7 @@ func (p *ProductWarehouseUsecase) TransferStock(transferStock *product_warehouse
 	}
 
 	if sourceProduct.AvailableStock < transferStock.Quantity {
-		return errors.New("stock is less than quantity")
+		return errors.New(entity.ErrorInsufficientStock)
 	}
 
 	err = p.productWarehouseRepo.AddAvailableStock(tx, transferStock.ProductId, transferStock.ToWarehouseId, transferStock.Quantity)
@@ -106,6 +106,15 @@ func (p *ProductWarehouseUsecase) DeductStockRequest(deductStock *product_wareho
 }
 
 func (p *ProductWarehouseUsecase) DeductStock(deductStock *product_warehouse.StockOperationRequest) error {
+	sourceProduct, err := p.productWarehouseRepo.GetByProductAndWarehouseId(deductStock.ProductId, deductStock.WarehouseId)
+	if err != nil {
+		return err
+	}
+
+	if sourceProduct.AvailableStock < deductStock.Quantity {
+		return errors.New(entity.ErrorInsufficientStock)
+	}
+
 	tx, err := p.mysql.Beginx()
 	if err != nil {
 		return err

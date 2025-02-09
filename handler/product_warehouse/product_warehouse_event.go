@@ -1,20 +1,26 @@
 package product_warehouse
 
 import (
+	"encoding/json"
 	"errors"
 	"warehouse-service/models/product_warehouse"
 )
 
 func (p *ProductWarehouseHandler) TransferStock(data interface{}) error {
-	request, ok := data.(product_warehouse.TransferStockRequest)
-	if !ok {
+	dataByte, err := json.Marshal(data)
+	if err != nil {
 		return errors.New("invalid body request")
+	}
+	request := product_warehouse.TransferStockRequest{}
+	err = json.Unmarshal(dataByte, &request)
+	if err != nil {
+		return err
 	}
 	if err := validate.Struct(request); err != nil {
 		return err
 	}
 
-	err := p.productWarehouseUsecase.TransferStock(&request)
+	err = p.productWarehouseUsecase.TransferStock(&request)
 	if err != nil {
 		return err
 	}
@@ -22,15 +28,20 @@ func (p *ProductWarehouseHandler) TransferStock(data interface{}) error {
 }
 
 func (p *ProductWarehouseHandler) AddStock(data interface{}) error {
-	request, ok := data.(product_warehouse.StockOperationRequest)
-	if !ok {
+	dataByte, err := json.Marshal(data)
+	if err != nil {
 		return errors.New("invalid body request")
+	}
+	request := product_warehouse.StockOperationRequest{}
+	err = json.Unmarshal(dataByte, &request)
+	if err != nil {
+		return err
 	}
 	if err := validate.Struct(request); err != nil {
 		return err
 	}
 
-	err := p.productWarehouseUsecase.AddStock(&request)
+	err = p.productWarehouseUsecase.AddStock(&request)
 	if err != nil {
 		return err
 	}
@@ -38,15 +49,20 @@ func (p *ProductWarehouseHandler) AddStock(data interface{}) error {
 }
 
 func (p *ProductWarehouseHandler) DeductStock(data interface{}) error {
-	request, ok := data.(product_warehouse.StockOperationRequest)
-	if !ok {
+	dataByte, err := json.Marshal(data)
+	if err != nil {
 		return errors.New("invalid body request")
+	}
+	request := product_warehouse.StockOperationRequest{}
+	err = json.Unmarshal(dataByte, &request)
+	if err != nil {
+		return err
 	}
 	if err := validate.Struct(request); err != nil {
 		return err
 	}
 
-	err := p.productWarehouseUsecase.DeductStock(&request)
+	err = p.productWarehouseUsecase.DeductStock(&request)
 	if err != nil {
 		return err
 	}
@@ -54,15 +70,20 @@ func (p *ProductWarehouseHandler) DeductStock(data interface{}) error {
 }
 
 func (p *ProductWarehouseHandler) ReleaseReservedStock(data interface{}) error {
-	request, ok := data.(product_warehouse.StockOperationRequest)
-	if !ok {
+	dataByte, err := json.Marshal(data)
+	if err != nil {
 		return errors.New("invalid body request")
+	}
+	request := product_warehouse.StockOperationRequest{}
+	err = json.Unmarshal(dataByte, &request)
+	if err != nil {
+		return err
 	}
 	if err := validate.Struct(request); err != nil {
 		return err
 	}
 
-	err := p.productWarehouseUsecase.ReleaseReservedStock(&request)
+	err = p.productWarehouseUsecase.ReleaseReservedStock(&request)
 	if err != nil {
 		return err
 	}
@@ -70,15 +91,20 @@ func (p *ProductWarehouseHandler) ReleaseReservedStock(data interface{}) error {
 }
 
 func (p *ProductWarehouseHandler) ReturnReservedStock(data interface{}) error {
-	request, ok := data.(product_warehouse.StockOperationRequest)
-	if !ok {
+	dataByte, err := json.Marshal(data)
+	if err != nil {
 		return errors.New("invalid body request")
+	}
+	request := product_warehouse.StockOperationRequest{}
+	err = json.Unmarshal(dataByte, &request)
+	if err != nil {
+		return err
 	}
 	if err := validate.Struct(request); err != nil {
 		return err
 	}
 
-	err := p.productWarehouseUsecase.ReturnReservedStock(&request)
+	err = p.productWarehouseUsecase.ReturnReservedStock(&request)
 	if err != nil {
 		return err
 	}

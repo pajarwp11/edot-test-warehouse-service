@@ -85,8 +85,15 @@ func (r *RabbitConsumer) startConsumer(ch *amqp091.Channel, queueName, routingKe
 			log.Printf("Received from %s: %+v\n", queueName, event)
 			err := r.handleEvent(event)
 			if err != nil {
-				d.Nack(false, true)
+				if err.Error() == entity.ErrorInsufficientStock {
+					log.Printf("Error processing event with data %s: %v\n", event, err)
+					d.Ack(false)
+				} else {
+					log.Printf("Error processing event with data %s: %v\n", event, err)
+					d.Nack(false, true)
+				}
 			} else {
+				log.Printf("Succes processing event with data: %v\n", event)
 				d.Ack(false)
 			}
 		}

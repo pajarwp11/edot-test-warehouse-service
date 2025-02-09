@@ -92,7 +92,7 @@ func (p *ProductWarehouseHandler) TranserStockRequest(w http.ResponseWriter, req
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	response.Message = "stock is transferred"
+	response.Message = "transfer in progress"
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -121,7 +121,7 @@ func (p *ProductWarehouseHandler) AddStockRequest(w http.ResponseWriter, req *ht
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	response.Message = "stock is added"
+	response.Message = "add stock in progress"
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -150,7 +150,7 @@ func (p *ProductWarehouseHandler) DeductStockRequest(w http.ResponseWriter, req 
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	response.Message = "stock is deducted"
+	response.Message = "deduct stock in progress"
 	json.NewEncoder(w).Encode(response)
 }
 

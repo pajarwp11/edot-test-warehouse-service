@@ -3,6 +3,7 @@ package rabbitmq
 import (
 	"context"
 	"encoding/json"
+	"log"
 
 	"github.com/rabbitmq/amqp091-go"
 )
@@ -39,7 +40,7 @@ func (r *RabbitPublisher) PublishEvent(eventType string, data interface{}) error
 	}
 	body, _ := json.Marshal(event)
 
-	return ch.PublishWithContext(
+	err = ch.PublishWithContext(
 		context.Background(),
 		exhangeName,
 		eventType,
@@ -49,4 +50,10 @@ func (r *RabbitPublisher) PublishEvent(eventType string, data interface{}) error
 			Body:        body,
 		},
 	)
+
+	if err != nil {
+		log.Printf("Error publish %s with data: %v\n", eventType, string(body))
+	}
+	log.Printf("Success publish %s with data: %v\n", eventType, string(body))
+	return nil
 }
