@@ -45,7 +45,11 @@ func (r *RabbitConsumer) ConsumeEvents() {
 	}
 
 	topics := map[string]string{
-		"stock.transfer": "queue_stock_transfer",
+		entity.StockTransferEvent: "queue_stock_transfer",
+		entity.StockAddEvent:      "queue_stock_add",
+		entity.StockDeductEvent:   "queue_stock_deduct",
+		entity.StockReleaseEvent:  "queue_stock_release",
+		entity.StockReturnEvent:   "queue_stock_return",
 	}
 
 	for routingKey, queueName := range topics {
