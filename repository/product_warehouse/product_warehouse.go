@@ -53,8 +53,40 @@ func (p *ProductWarehouseRepository) GetByProductAndWarehouseId(productId int, w
 	return &data, err
 }
 
-func (p *ProductWarehouseRepository) GetAvailableStock(productId int, shopId int) (int, error) {
-	var availableStock int
-	err := p.mysql.Get(&availableStock, "SELECT COALESCE(SUM(pw.available_stock), 0) FROM product_warehouses pw JOIN warehouses w ON pw.warehouse_id=w.id  WHERE pw.product_id=? AND w.shop_id=? AND w.status=?", productId, shopId, entity.WarehouseActive)
-	return availableStock, err
+func (p *ProductWarehouseRepository) GetAvailableStockBulk(productShopMap map[int]int) (map[int]int, error) {
+	productIds := []int{}
+	shopIds := []int{}
+	for productId, shopId := range productShopMap {
+		productIds = append(productIds, productId)
+		shopIds = append(shopIds, shopId)
+	}
+
+	query, args, err := sqlx.In(`
+		SELECT pw.product_id, w.shop_id, COALESCE(SUM(pw.available_stock), 0) AS total_stock
+		FROM product_warehouses pw
+		JOIN warehouses w ON pw.warehouse_id = w.id
+		WHERE pw.product_id IN (?) AND w.shop_id IN (?) AND w.status = ?
+		GROUP BY pw.product_id, w.shop_id
+	`, productIds, shopIds, entity.WarehouseActive)
+	if err != nil {
+		return nil, err
+	}
+
+	query = p.mysql.Rebind(query)
+	rows, err := p.mysql.Queryx(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	stockMap := make(map[int]int)
+	for rows.Next() {
+		var productId, shopId, totalStock int
+		if err := rows.Scan(&productId, &shopId, &totalStock); err != nil {
+			return nil, err
+		}
+		stockMap[productId] = totalStock
+	}
+
+	return stockMap, nil
 }

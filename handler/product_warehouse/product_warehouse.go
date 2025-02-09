@@ -19,7 +19,7 @@ type ProductWarehouseUsecase interface {
 	DeductStock(deductStock *product_warehouse.StockOperationRequest) error
 	ReleaseReservedStock(operationStock *product_warehouse.StockOperationRequest) error
 	ReturnReservedStock(operationStock *product_warehouse.StockOperationRequest) error
-	GetAvailableStock(getAvailableStock *product_warehouse.GetAvailableStockRequest) (int, error)
+	GetAvailableStockBulk(getAvailableStock *product_warehouse.GetAvailableStockRequest) (map[int]int, error)
 }
 
 type ProductWarehouseHandler struct {
@@ -252,7 +252,7 @@ func (p *ProductWarehouseHandler) GetAvailableStock(w http.ResponseWriter, req *
 		return
 	}
 
-	availableStock, err := p.productWarehouseUsecase.GetAvailableStock(&request)
+	availableStock, err := p.productWarehouseUsecase.GetAvailableStockBulk(&request)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		response.Message = err.Error()

@@ -28,6 +28,5 @@ type StockOperationRequest struct {
 }
 
 type GetAvailableStockRequest struct {
-	ProductId int `json:"product_id" validate:"required"`
-	ShopId    int `json:"shop_id" validate:"required"`
+	ProductShopMap map[int]int `json:"product_shop_map"`
 }
