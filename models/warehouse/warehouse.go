@@ -11,6 +11,7 @@ type RegisterRequest struct {
 	Name    string `json:"name" validate:"required"`
 	Address string `json:"address" validate:"required"`
 	ShopId  int    `json:"shop_id" validate:"required"`
+	Status  string `json:"status" validate:"required"`
 }
 
 type UpdateStatusRequest struct {

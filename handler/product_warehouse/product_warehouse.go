@@ -19,7 +19,7 @@ type ProductWarehouseUsecase interface {
 	DeductStock(deductStock *product_warehouse.StockOperationRequest) error
 	ReleaseReservedStock(operationStock *product_warehouse.StockOperationRequest) error
 	ReturnReservedStock(operationStock *product_warehouse.StockOperationRequest) error
-	GetAvailableStockBulk(getAvailableStock *product_warehouse.GetAvailableStockRequest) (map[int]int, error)
+	GetAvailableStockBulk(getAvailableStock []product_warehouse.ProductShop) (map[int]int, error)
 }
 
 type ProductWarehouseHandler struct {
@@ -236,9 +236,11 @@ func (p *ProductWarehouseHandler) ReturnReservedStock(data interface{}) error {
 }
 
 func (p *ProductWarehouseHandler) GetAvailableStock(w http.ResponseWriter, req *http.Request) {
-	request := product_warehouse.GetAvailableStockRequest{}
+	var request []product_warehouse.ProductShop
 	response := Response{}
+
 	w.Header().Set("Content-Type", "application/json")
+
 	if err := json.NewDecoder(req.Body).Decode(&request); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		response.Message = "invalid request body"
@@ -246,19 +248,22 @@ func (p *ProductWarehouseHandler) GetAvailableStock(w http.ResponseWriter, req *
 		return
 	}
 
-	if err := validate.Struct(request); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{"message": err.Error()})
-		return
+	for _, item := range request {
+		if err := validate.Struct(item); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]string{"message": err.Error()})
+			return
+		}
 	}
 
-	availableStock, err := p.productWarehouseUsecase.GetAvailableStockBulk(&request)
+	availableStock, err := p.productWarehouseUsecase.GetAvailableStockBulk(request)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		response.Message = err.Error()
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
 	response.Message = "get available stock success"
 	response.Data = availableStock

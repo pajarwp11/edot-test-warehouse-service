@@ -53,10 +53,10 @@ func (p *ProductWarehouseRepository) GetByProductAndWarehouseId(productId int, w
 	return &data, err
 }
 
-func (p *ProductWarehouseRepository) GetAvailableStockBulk(availableStockRequest *product_warehouse.GetAvailableStockRequest) (map[int]int, error) {
+func (p *ProductWarehouseRepository) GetAvailableStockBulk(availableStockRequest []product_warehouse.ProductShop) (map[int]int, error) {
 	productIds := []int{}
 	shopIds := []int{}
-	for _, productShopMap := range availableStockRequest.ProductShopMap {
+	for _, productShopMap := range availableStockRequest {
 		productIds = append(productIds, productShopMap.ProductId)
 		shopIds = append(shopIds, productShopMap.ShopId)
 	}

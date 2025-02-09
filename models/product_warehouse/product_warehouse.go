@@ -27,10 +27,6 @@ type StockOperationRequest struct {
 	Quantity    int `json:"quantity" validate:"required"`
 }
 
-type GetAvailableStockRequest struct {
-	ProductShopMap []ProductShop `json:"product_shop"`
-}
-
 type ProductShop struct {
 	ProductId int `json:"product_id" validate:"required"`
 	ShopId    int `json:"shop_id" validate:"required"`

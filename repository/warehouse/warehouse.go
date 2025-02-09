@@ -17,7 +17,7 @@ func NewWarehouseRepository(mysql *sqlx.DB) *WarehouseRepository {
 }
 
 func (w *WarehouseRepository) Insert(warehouse *warehouse.RegisterRequest) error {
-	_, err := w.mysql.Exec("INSERT INTO warehouses (name,address,user_id) VALUES (?,?,?)", warehouse.Name, warehouse.Address, warehouse.ShopId)
+	_, err := w.mysql.Exec("INSERT INTO warehouses (name,address,user_id,status) VALUES (?,?,?,?)", warehouse.Name, warehouse.Address, warehouse.ShopId, warehouse.Status)
 	return err
 }
 
