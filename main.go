@@ -28,7 +28,7 @@ func main() {
 	warehouseUsecase := warehouseUsecase.NewWarehouseUsecase(warehouseRepository)
 	warehouseHandler := warehouseHandler.NewWarehouseHandler(warehouseUsecase)
 	router.Handle("/warehouse/register", middleware.JWTMiddleware(http.HandlerFunc(warehouseHandler.Register))).Methods(http.MethodPost)
-	router.Handle("/warehouse/update-status", middleware.JWTMiddleware(http.HandlerFunc(warehouseHandler.UpdateStatus))).Methods(http.MethodPut)
+	router.Handle("/warehouse/update-status/{id}", middleware.JWTMiddleware(http.HandlerFunc(warehouseHandler.UpdateStatus))).Methods(http.MethodPut)
 
 	productWarehouseRepository := productWarehouseRepo.NewProductWarehouseRepository(mysql.MySQL)
 	productWarehouseUsecase := productWarehouseUsecase.NewProductWarehouseUsecase(productWarehouseRepository, rabbitPublisher, mysql.MySQL)

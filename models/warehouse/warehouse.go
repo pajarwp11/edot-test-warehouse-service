@@ -15,6 +15,6 @@ type RegisterRequest struct {
 }
 
 type UpdateStatusRequest struct {
-	Id     int    `json:"id" validate:"required"`
+	Id     int
 	Status string `json:"status" validate:"required"`
 }

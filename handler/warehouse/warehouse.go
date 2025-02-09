@@ -3,9 +3,11 @@ package warehouse
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"warehouse-service/models/warehouse"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/gorilla/mux"
 )
 
 type WarehouseUsecase interface {
@@ -76,7 +78,25 @@ func (wa *WarehouseHandler) UpdateStatus(w http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	err := wa.warehouseUsecase.UpdateStatus(&request)
+	vars := mux.Vars(req)
+	id := vars["id"]
+
+	if id == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		response.Message = "id is required"
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+	var err error
+	request.Id, err = strconv.Atoi(id)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		response.Message = "id must be numeric"
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	err = wa.warehouseUsecase.UpdateStatus(&request)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		response.Message = err.Error()
