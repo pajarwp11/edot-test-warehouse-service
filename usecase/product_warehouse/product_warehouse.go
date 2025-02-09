@@ -203,7 +203,11 @@ func (p *ProductWarehouseUsecase) ReserveStock(operationStock []product_warehous
 			return err
 		}
 		if availableStock < operation.Quantity {
-			// TO DO: publish event order cancel
+			updateOrderRequest := product_warehouse.UpdateStatusRequest{
+				Id:     operation.OrderId,
+				Status: "cancel",
+			}
+			go p.publisher.PublishEvent(entity.OrderUpdateStatusEvent, updateOrderRequest)
 			return errors.New(entity.ErrorInsufficientStock)
 		}
 		productWarehouses, err := p.productWarehouseRepo.GetAllByProductId(operation.ProductId)

@@ -7,4 +7,6 @@ const (
 	StockReleaseEvent  = "stock.release"
 	StockReturnEvent   = "stock.return"
 	StockReserveEvent  = "stock.reserve"
+
+	OrderUpdateStatusEvent = "order.update_status"
 )

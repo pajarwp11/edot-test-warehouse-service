@@ -22,6 +22,7 @@ type TransferStockRequest struct {
 }
 
 type StockOperationRequest struct {
+	OrderId     int `json:"order_id"`
 	ProductId   int `json:"product_id" validate:"required"`
 	WarehouseId int `json:"warehouse_id" validate:"required"`
 	Quantity    int `json:"quantity" validate:"required"`
@@ -30,4 +31,9 @@ type StockOperationRequest struct {
 type ProductShop struct {
 	ProductId int `json:"product_id" validate:"required"`
 	ShopId    int `json:"shop_id" validate:"required"`
+}
+
+type UpdateStatusRequest struct {
+	Id     int    `json:"id"`
+	Status string `json:"status"`
 }
