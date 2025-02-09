@@ -12,11 +12,13 @@ type ProductWarehouseRepository interface {
 	Insert(productWarehouse *product_warehouse.RegisterRequest) error
 	AddAvailableStock(tx *sqlx.Tx, productId int, warehouseId int, addedAvailableStock int) error
 	SubstractAvailableStock(tx *sqlx.Tx, productId int, warehouseId int, substractedAvailableStock int) error
-	AddAvailableStockSubsReservedStock(productId int, warehouseId int, addedAvailableStock int, substractedReservedStock int) error
-	SubsAvailableStockAddReservedStock(productId int, warehouseId int, substractedAvailableStock int, addedReservedStock int) error
+	AddAvailableStockSubsReservedStock(tx *sqlx.Tx, productId int, warehouseId int, addedAvailableStock int, substractedReservedStock int) error
+	SubsAvailableStockAddReservedStock(tx *sqlx.Tx, productId int, warehouseId int, substractedAvailableStock int, addedReservedStock int) error
 	SubstractReservedStock(productId int, warehouseId int, substractedReservedStock int) error
 	GetByProductAndWarehouseId(productId int, wareHouseId int) (*product_warehouse.ProductWarehouse, error)
 	GetAvailableStockBulk(availableStockRequest []product_warehouse.ProductShop) (map[int]int, error)
+	GetAllByProductId(productId int) ([]product_warehouse.ProductWarehouse, error)
+	GetAvailableStock(productId int) (int, error)
 }
 
 type Publisher interface {
@@ -142,24 +144,102 @@ func (p *ProductWarehouseUsecase) ReleaseReservedStock(operationStock *product_w
 	return nil
 }
 
-func (p *ProductWarehouseUsecase) ReturnReservedStock(operationStock *product_warehouse.StockOperationRequest) error {
+func (p *ProductWarehouseUsecase) ReturnReservedStock(operationStock []product_warehouse.StockOperationRequest) error {
 	tx, err := p.mysql.Beginx()
 	if err != nil {
 		return err
 	}
+
 	defer func() {
 		if err != nil {
 			tx.Rollback()
 		}
 	}()
-	err = p.productWarehouseRepo.AddAvailableStockSubsReservedStock(operationStock.ProductId, operationStock.WarehouseId, operationStock.Quantity, operationStock.Quantity)
+
+	for _, operation := range operationStock {
+		productWarehouses, err := p.productWarehouseRepo.GetAllByProductId(operation.ProductId)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		returnedStock := operation.Quantity
+
+		for i := 0; i < len(productWarehouses) && returnedStock > 0; i++ {
+			warehouse := productWarehouses[i]
+
+			queryQuantity := min(warehouse.ReservedStock, returnedStock)
+
+			err = p.productWarehouseRepo.AddAvailableStockSubsReservedStock(tx, operation.ProductId, warehouse.WarehouseId, queryQuantity, queryQuantity)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+
+			returnedStock -= queryQuantity
+		}
+	}
+
+	tx.Commit()
+	return nil
+}
+
+func (p *ProductWarehouseUsecase) ReserveStock(operationStock []product_warehouse.StockOperationRequest) error {
+	tx, err := p.mysql.Beginx()
 	if err != nil {
 		return err
 	}
+
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	for _, operation := range operationStock {
+		availableStock, err := p.productWarehouseRepo.GetAvailableStock(operation.ProductId)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+		if availableStock < operation.Quantity {
+			// TO DO: publish event order cancel
+			return errors.New(entity.ErrorInsufficientStock)
+		}
+		productWarehouses, err := p.productWarehouseRepo.GetAllByProductId(operation.ProductId)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		reservedStock := operation.Quantity
+
+		for i := 0; i < len(productWarehouses) && reservedStock > 0; i++ {
+			warehouse := productWarehouses[i]
+
+			queryQuantity := min(warehouse.AvailableStock, reservedStock)
+
+			err = p.productWarehouseRepo.SubsAvailableStockAddReservedStock(tx, operation.ProductId, warehouse.WarehouseId, queryQuantity, queryQuantity)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+
+			reservedStock -= queryQuantity
+		}
+	}
+
 	tx.Commit()
 	return nil
 }
 
 func (p *ProductWarehouseUsecase) GetAvailableStockBulk(getAvailableStock []product_warehouse.ProductShop) (map[int]int, error) {
 	return p.productWarehouseRepo.GetAvailableStockBulk(getAvailableStock)
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }

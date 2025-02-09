@@ -6,4 +6,5 @@ const (
 	StockDeductEvent   = "stock.deduct"
 	StockReleaseEvent  = "stock.release"
 	StockReturnEvent   = "stock.return"
+	StockReserveEvent  = "stock.reserve"
 )

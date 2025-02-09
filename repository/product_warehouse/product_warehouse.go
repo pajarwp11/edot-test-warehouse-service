@@ -32,13 +32,13 @@ func (p *ProductWarehouseRepository) SubstractAvailableStock(tx *sqlx.Tx, produc
 	return err
 }
 
-func (p *ProductWarehouseRepository) AddAvailableStockSubsReservedStock(productId int, warehouseId int, addedAvailableStock int, substractedReservedStock int) error {
-	_, err := p.mysql.Exec("UPDATE product_warehouses SET available_stock = available_stock + ?, reserved_stock = reserved_stock - ? WHERE product_id=? and warehouse_id=?", addedAvailableStock, substractedReservedStock, productId, warehouseId)
+func (p *ProductWarehouseRepository) AddAvailableStockSubsReservedStock(tx *sqlx.Tx, productId int, warehouseId int, addedAvailableStock int, substractedReservedStock int) error {
+	_, err := tx.Exec("UPDATE product_warehouses SET available_stock = available_stock + ?, reserved_stock = reserved_stock - ? WHERE product_id=? and warehouse_id=?", addedAvailableStock, substractedReservedStock, productId, warehouseId)
 	return err
 }
 
-func (p *ProductWarehouseRepository) SubsAvailableStockAddReservedStock(productId int, warehouseId int, substractedAvailableStock int, addedReservedStock int) error {
-	_, err := p.mysql.Exec("UPDATE product_warehouses SET available_stock = available_stock - ?, reserved_stock = reserved_stock + ? WHERE product_id=? and warehouse_id=?", substractedAvailableStock, addedReservedStock, productId, warehouseId)
+func (p *ProductWarehouseRepository) SubsAvailableStockAddReservedStock(tx *sqlx.Tx, productId int, warehouseId int, substractedAvailableStock int, addedReservedStock int) error {
+	_, err := tx.Exec("UPDATE product_warehouses SET available_stock = available_stock - ?, reserved_stock = reserved_stock + ? WHERE product_id=? and warehouse_id=?", substractedAvailableStock, addedReservedStock, productId, warehouseId)
 	return err
 }
 
@@ -89,4 +89,36 @@ func (p *ProductWarehouseRepository) GetAvailableStockBulk(availableStockRequest
 	}
 
 	return stockMap, nil
+}
+
+func (p *ProductWarehouseRepository) GetAllByProductId(productId int) ([]product_warehouse.ProductWarehouse, error) {
+	query := `
+		SELECT pw.id, pw.product_id, pw.warehouse_id, pw.available_stock, pw.reserved_stock
+		FROM product_warehouses pw
+		JOIN warehouses w ON pw.warehouse_id = w.id
+		WHERE pw.product_id = ? AND w.status = ?
+	`
+
+	var productWarehouses []product_warehouse.ProductWarehouse
+	err := p.mysql.Select(&productWarehouses, query, productId, entity.WarehouseActive)
+	if err != nil {
+		return nil, err
+	}
+	return productWarehouses, nil
+}
+
+func (p *ProductWarehouseRepository) GetAvailableStock(productId int) (int, error) {
+	query := `
+		SELECT COALESCE(SUM(pw.available_stock), 0)
+		FROM product_warehouses pw
+		JOIN warehouses w ON pw.warehouse_id = w.id
+		WHERE pw.product_id = ? AND w.status = ?
+	`
+
+	var availableStock int
+	err := p.mysql.Get(&availableStock, query, productId, entity.WarehouseActive)
+	if err != nil {
+		return 0, err
+	}
+	return availableStock, nil
 }

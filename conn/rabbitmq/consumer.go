@@ -15,6 +15,7 @@ type StockHandler interface {
 	DeductStock(data interface{}) error
 	ReleaseReservedStock(data interface{}) error
 	ReturnReservedStock(data interface{}) error
+	ReserveStock(data interface{}) error
 }
 
 type RabbitConsumer struct {
@@ -50,6 +51,7 @@ func (r *RabbitConsumer) ConsumeEvents() {
 		entity.StockDeductEvent:   "queue_stock_deduct",
 		entity.StockReleaseEvent:  "queue_stock_release",
 		entity.StockReturnEvent:   "queue_stock_return",
+		entity.StockReserveEvent:  "queue_stock_reserve",
 	}
 
 	for routingKey, queueName := range topics {
@@ -112,6 +114,8 @@ func (r *RabbitConsumer) handleEvent(event Event) error {
 		return r.stockHandler.ReleaseReservedStock(event.Data)
 	case entity.StockReturnEvent:
 		return r.stockHandler.ReturnReservedStock(event.Data)
+	case entity.StockReserveEvent:
+		return r.stockHandler.ReserveStock(event.Data)
 	default:
 		fmt.Println("Unknown event:", event.Type)
 		return nil
