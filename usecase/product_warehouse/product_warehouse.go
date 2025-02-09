@@ -63,6 +63,7 @@ func (p *ProductWarehouseUsecase) TransferStock(transferStock *product_warehouse
 	}
 
 	if sourceProduct.AvailableStock < transferStock.Quantity {
+		// TO DO: send notif to user
 		return errors.New(entity.ErrorInsufficientStock)
 	}
 
@@ -112,6 +113,7 @@ func (p *ProductWarehouseUsecase) DeductStock(deductStock *product_warehouse.Sto
 	}
 
 	if sourceProduct.AvailableStock < deductStock.Quantity {
+		// TO DO: send notif to user
 		return errors.New(entity.ErrorInsufficientStock)
 	}
 

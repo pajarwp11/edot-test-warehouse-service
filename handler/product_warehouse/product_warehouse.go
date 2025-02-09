@@ -84,6 +84,13 @@ func (p *ProductWarehouseHandler) TranserStockRequest(w http.ResponseWriter, req
 		return
 	}
 
+	if request.FromWarehouseId == request.ToWarehouseId {
+		w.WriteHeader(http.StatusInternalServerError)
+		response.Message = "transfer must be to different warehouse"
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
 	err := p.productWarehouseUsecase.TransferStockRequest(&request)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
