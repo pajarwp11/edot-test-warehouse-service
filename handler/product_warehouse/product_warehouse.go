@@ -2,7 +2,6 @@ package product_warehouse
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"warehouse-service/models/product_warehouse"
 
@@ -97,22 +96,6 @@ func (p *ProductWarehouseHandler) TranserStockRequest(w http.ResponseWriter, req
 	json.NewEncoder(w).Encode(response)
 }
 
-func (p *ProductWarehouseHandler) TransferStock(data interface{}) error {
-	request, ok := data.(product_warehouse.TransferStockRequest)
-	if !ok {
-		return errors.New("invalid body request")
-	}
-	if err := validate.Struct(request); err != nil {
-		return err
-	}
-
-	err := p.productWarehouseUsecase.TransferStock(&request)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (p *ProductWarehouseHandler) AddStockRequest(w http.ResponseWriter, req *http.Request) {
 	request := product_warehouse.StockOperationRequest{}
 	response := Response{}
@@ -142,22 +125,6 @@ func (p *ProductWarehouseHandler) AddStockRequest(w http.ResponseWriter, req *ht
 	json.NewEncoder(w).Encode(response)
 }
 
-func (p *ProductWarehouseHandler) AddStock(data interface{}) error {
-	request, ok := data.(product_warehouse.StockOperationRequest)
-	if !ok {
-		return errors.New("invalid body request")
-	}
-	if err := validate.Struct(request); err != nil {
-		return err
-	}
-
-	err := p.productWarehouseUsecase.AddStock(&request)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (p *ProductWarehouseHandler) DeductStockRequest(w http.ResponseWriter, req *http.Request) {
 	request := product_warehouse.StockOperationRequest{}
 	response := Response{}
@@ -185,54 +152,6 @@ func (p *ProductWarehouseHandler) DeductStockRequest(w http.ResponseWriter, req 
 	w.WriteHeader(http.StatusOK)
 	response.Message = "stock is deducted"
 	json.NewEncoder(w).Encode(response)
-}
-
-func (p *ProductWarehouseHandler) DeductStock(data interface{}) error {
-	request, ok := data.(product_warehouse.StockOperationRequest)
-	if !ok {
-		return errors.New("invalid body request")
-	}
-	if err := validate.Struct(request); err != nil {
-		return err
-	}
-
-	err := p.productWarehouseUsecase.DeductStock(&request)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (p *ProductWarehouseHandler) ReleaseReservedStock(data interface{}) error {
-	request, ok := data.(product_warehouse.StockOperationRequest)
-	if !ok {
-		return errors.New("invalid body request")
-	}
-	if err := validate.Struct(request); err != nil {
-		return err
-	}
-
-	err := p.productWarehouseUsecase.ReleaseReservedStock(&request)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (p *ProductWarehouseHandler) ReturnReservedStock(data interface{}) error {
-	request, ok := data.(product_warehouse.StockOperationRequest)
-	if !ok {
-		return errors.New("invalid body request")
-	}
-	if err := validate.Struct(request); err != nil {
-		return err
-	}
-
-	err := p.productWarehouseUsecase.ReturnReservedStock(&request)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (p *ProductWarehouseHandler) GetAvailableStock(w http.ResponseWriter, req *http.Request) {
