@@ -46,3 +46,11 @@ type StockOperationProductRequest struct {
 	ProductId int `json:"product_id" validate:"required"`
 	Quantity  int `json:"quantity" validate:"required"`
 }
+
+type OrderWarehouse struct {
+	Id            int `db:"id"`
+	OrderId       int `db:"order_id"`
+	ProductId     int `db:"product_id"`
+	WarehouseId   int `db:"warehouse_id"`
+	ReservedStock int `db:"reserved_stock"`
+}

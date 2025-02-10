@@ -123,3 +123,24 @@ func (p *ProductWarehouseRepository) GetAvailableStock(productId int) (int, erro
 	}
 	return availableStock, nil
 }
+
+func (p *ProductWarehouseRepository) InsertOrderWarehouse(tx *sqlx.Tx, orderWarehouse *product_warehouse.OrderWarehouse) error {
+	_, err := tx.Exec("INSERT INTO order_warehouses (order_id,product_id,warehouse_id,reserved_stock) VALUES (?,?,?,?)", orderWarehouse.OrderId, orderWarehouse.ProductId, orderWarehouse.WarehouseId, orderWarehouse.ReservedStock)
+	return err
+}
+
+func (p *ProductWarehouseRepository) GetOrderWarehouseByOrderId(orderId int) ([]product_warehouse.OrderWarehouse, error) {
+	query := `
+		SELECT id, order_id, product_id, warehouse_id, reserved_stock
+		FROM order_warehouses
+		WHERE order_id = ?
+	`
+
+	var orderWarehouses []product_warehouse.OrderWarehouse
+	err := p.mysql.Select(&orderWarehouses, query, orderId)
+	if err != nil {
+		return nil, err
+	}
+
+	return orderWarehouses, nil
+}

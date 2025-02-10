@@ -19,6 +19,8 @@ type ProductWarehouseRepository interface {
 	GetAvailableStockBulk(availableStockRequest []product_warehouse.ProductShop) (map[int]int, error)
 	GetAllByProductId(productId int) ([]product_warehouse.ProductWarehouse, error)
 	GetAvailableStock(productId int) (int, error)
+	InsertOrderWarehouse(tx *sqlx.Tx, orderWarehouse *product_warehouse.OrderWarehouse) error
+	GetOrderWarehouseByOrderId(orderId int) ([]product_warehouse.OrderWarehouse, error)
 }
 
 type Publisher interface {
@@ -225,6 +227,19 @@ func (p *ProductWarehouseUsecase) ReserveStock(operationStock *product_warehouse
 			queryQuantity := min(warehouse.AvailableStock, reservedStock)
 
 			err = p.productWarehouseRepo.SubsAvailableStockAddReservedStock(tx, operation.ProductId, warehouse.WarehouseId, queryQuantity, queryQuantity)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+
+			orderWarehouse := product_warehouse.OrderWarehouse{
+				OrderId:       operationStock.OrderId,
+				ProductId:     operation.ProductId,
+				WarehouseId:   warehouse.WarehouseId,
+				ReservedStock: queryQuantity,
+			}
+
+			err = p.productWarehouseRepo.InsertOrderWarehouse(tx, &orderWarehouse)
 			if err != nil {
 				tx.Rollback()
 				return err
