@@ -42,7 +42,7 @@ func (p *ProductWarehouseRepository) SubsAvailableStockAddReservedStock(tx *sqlx
 	return err
 }
 
-func (p *ProductWarehouseRepository) SubstractReservedStock(productId int, warehouseId int, substractedReservedStock int) error {
+func (p *ProductWarehouseRepository) SubstractReservedStock(tx *sqlx.Tx, productId int, warehouseId int, substractedReservedStock int) error {
 	_, err := p.mysql.Exec("UPDATE product_warehouses SET reserved_stock = reserved_stock - ? WHERE product_id=? and warehouse_id=?", substractedReservedStock, productId, warehouseId)
 	return err
 }

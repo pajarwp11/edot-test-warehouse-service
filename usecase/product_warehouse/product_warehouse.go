@@ -14,7 +14,7 @@ type ProductWarehouseRepository interface {
 	SubstractAvailableStock(tx *sqlx.Tx, productId int, warehouseId int, substractedAvailableStock int) error
 	AddAvailableStockSubsReservedStock(tx *sqlx.Tx, productId int, warehouseId int, addedAvailableStock int, substractedReservedStock int) error
 	SubsAvailableStockAddReservedStock(tx *sqlx.Tx, productId int, warehouseId int, substractedAvailableStock int, addedReservedStock int) error
-	SubstractReservedStock(productId int, warehouseId int, substractedReservedStock int) error
+	SubstractReservedStock(tx *sqlx.Tx, productId int, warehouseId int, substractedReservedStock int) error
 	GetByProductAndWarehouseId(productId int, wareHouseId int) (*product_warehouse.ProductWarehouse, error)
 	GetAvailableStockBulk(availableStockRequest []product_warehouse.ProductShop) (map[int]int, error)
 	GetAllByProductId(productId int) ([]product_warehouse.ProductWarehouse, error)
@@ -138,11 +138,31 @@ func (p *ProductWarehouseUsecase) DeductStock(deductStock *product_warehouse.Sto
 	return nil
 }
 
-func (p *ProductWarehouseUsecase) ReleaseReservedStock(operationStock *product_warehouse.StockOperationRequest) error {
-	err := p.productWarehouseRepo.SubstractReservedStock(operationStock.ProductId, operationStock.WarehouseId, operationStock.Quantity)
+func (p *ProductWarehouseUsecase) ReleaseReservedStock(order *product_warehouse.Order) error {
+	orderWarehouses, err := p.productWarehouseRepo.GetOrderWarehouseByOrderId(order.OrderId)
 	if err != nil {
 		return err
 	}
+	tx, err := p.mysql.Beginx()
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	for _, orderWarehouse := range orderWarehouses {
+		err := p.productWarehouseRepo.SubstractReservedStock(tx, orderWarehouse.ProductId, orderWarehouse.WarehouseId, orderWarehouse.ReservedStock)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	tx.Commit()
 	return nil
 }
 

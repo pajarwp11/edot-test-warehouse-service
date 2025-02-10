@@ -16,7 +16,7 @@ type ProductWarehouseUsecase interface {
 	AddStock(addStock *product_warehouse.StockOperationRequest) error
 	DeductStockRequest(deductStock *product_warehouse.StockOperationRequest) error
 	DeductStock(deductStock *product_warehouse.StockOperationRequest) error
-	ReleaseReservedStock(operationStock *product_warehouse.StockOperationRequest) error
+	ReleaseReservedStock(order *product_warehouse.Order) error
 	ReturnReservedStock(order *product_warehouse.Order) error
 	GetAvailableStockBulk(getAvailableStock []product_warehouse.ProductShop) (map[int]int, error)
 	ReserveStock(operationStock *product_warehouse.StockOperationOrderRequest) error

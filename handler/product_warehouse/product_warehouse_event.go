@@ -74,7 +74,7 @@ func (p *ProductWarehouseHandler) ReleaseReservedStock(data interface{}) error {
 	if err != nil {
 		return errors.New("invalid body request")
 	}
-	request := product_warehouse.StockOperationRequest{}
+	request := product_warehouse.Order{}
 	err = json.Unmarshal(dataByte, &request)
 	if err != nil {
 		return err
