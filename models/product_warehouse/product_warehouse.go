@@ -41,3 +41,8 @@ type UpdateStatusRequest struct {
 	Id     int    `json:"id"`
 	Status string `json:"status"`
 }
+
+type StockOperationProductRequest struct {
+	ProductId int `json:"product_id" validate:"required"`
+	Quantity  int `json:"quantity" validate:"required"`
+}

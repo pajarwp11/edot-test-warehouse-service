@@ -97,6 +97,7 @@ func (p *ProductWarehouseRepository) GetAllByProductId(productId int) ([]product
 		FROM product_warehouses pw
 		JOIN warehouses w ON pw.warehouse_id = w.id
 		WHERE pw.product_id = ? AND w.status = ?
+		ORDER BY pw.id asc
 	`
 
 	var productWarehouses []product_warehouse.ProductWarehouse

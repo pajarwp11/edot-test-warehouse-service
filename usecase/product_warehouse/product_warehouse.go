@@ -144,7 +144,7 @@ func (p *ProductWarehouseUsecase) ReleaseReservedStock(operationStock *product_w
 	return nil
 }
 
-func (p *ProductWarehouseUsecase) ReturnReservedStock(operationStock []product_warehouse.StockOperationRequest) error {
+func (p *ProductWarehouseUsecase) ReturnReservedStock(operationStock []product_warehouse.StockOperationProductRequest) error {
 	tx, err := p.mysql.Beginx()
 	if err != nil {
 		return err
