@@ -54,3 +54,7 @@ type OrderWarehouse struct {
 	WarehouseId   int `db:"warehouse_id"`
 	ReservedStock int `db:"reserved_stock"`
 }
+
+type Order struct {
+	OrderId int `json:"order_id" validate:"required"`
+}

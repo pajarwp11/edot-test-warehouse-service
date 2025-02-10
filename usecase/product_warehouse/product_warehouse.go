@@ -146,7 +146,11 @@ func (p *ProductWarehouseUsecase) ReleaseReservedStock(operationStock *product_w
 	return nil
 }
 
-func (p *ProductWarehouseUsecase) ReturnReservedStock(operationStock []product_warehouse.StockOperationProductRequest) error {
+func (p *ProductWarehouseUsecase) ReturnReservedStock(order *product_warehouse.Order) error {
+	orderWarehouses, err := p.productWarehouseRepo.GetOrderWarehouseByOrderId(order.OrderId)
+	if err != nil {
+		return err
+	}
 	tx, err := p.mysql.Beginx()
 	if err != nil {
 		return err
@@ -158,27 +162,11 @@ func (p *ProductWarehouseUsecase) ReturnReservedStock(operationStock []product_w
 		}
 	}()
 
-	for _, operation := range operationStock {
-		productWarehouses, err := p.productWarehouseRepo.GetAllByProductId(operation.ProductId)
+	for _, orderWarehouse := range orderWarehouses {
+		err = p.productWarehouseRepo.AddAvailableStockSubsReservedStock(tx, orderWarehouse.ProductId, orderWarehouse.WarehouseId, orderWarehouse.ReservedStock, orderWarehouse.ReservedStock)
 		if err != nil {
 			tx.Rollback()
 			return err
-		}
-
-		returnedStock := operation.Quantity
-
-		for i := 0; i < len(productWarehouses) && returnedStock > 0; i++ {
-			warehouse := productWarehouses[i]
-
-			queryQuantity := min(warehouse.ReservedStock, returnedStock)
-
-			err = p.productWarehouseRepo.AddAvailableStockSubsReservedStock(tx, operation.ProductId, warehouse.WarehouseId, queryQuantity, queryQuantity)
-			if err != nil {
-				tx.Rollback()
-				return err
-			}
-
-			returnedStock -= queryQuantity
 		}
 	}
 

@@ -95,18 +95,16 @@ func (p *ProductWarehouseHandler) ReturnReservedStock(data interface{}) error {
 	if err != nil {
 		return errors.New("invalid body request")
 	}
-	request := []product_warehouse.StockOperationProductRequest{}
+	request := product_warehouse.Order{}
 	err = json.Unmarshal(dataByte, &request)
 	if err != nil {
 		return err
 	}
-	for _, req := range request {
-		if err := validate.Struct(req); err != nil {
-			return err
-		}
+	if err := validate.Struct(request); err != nil {
+		return err
 	}
 
-	err = p.productWarehouseUsecase.ReturnReservedStock(request)
+	err = p.productWarehouseUsecase.ReturnReservedStock(&request)
 	if err != nil {
 		return err
 	}
